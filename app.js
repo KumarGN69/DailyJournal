@@ -16,13 +16,33 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-let posts = [];
+//define mongoose use and connect to local DB
+const mongoose = require("mongoose");
+mongoose.connect("mongodb://localhost:27017/blogDB", {useNewUrlParser: true});
+
+//create schema for blog posts
+const postSchema = new mongoose.Schema({
+	// for the title of the post
+	// for the content of the blog post
+	title:String,
+	content:String
+});
+
+//definiton of model for the schema
+const Post = mongoose.model("Post",postSchema);
+
+// let posts = [];
 
 app.get("/", function(req, res){
-  res.render("home", {
-    startingContent: homeStartingContent,
-    posts: posts
-    });
+	
+	Post.find({}, function(err, posts){
+    res.render("home", {
+      startingContent: homeStartingContent,
+      posts: posts
+      });
+  });
+
+  
 });
 
 app.get("/about", function(req, res){
@@ -38,30 +58,55 @@ app.get("/compose", function(req, res){
 });
 
 app.post("/compose", function(req, res){
-  const post = {
-    title: req.body.postTitle,
-    content: req.body.postBody
-  };
 
-  posts.push(post);
+//create a new collection	
+const post = new  Post({
+	title:req.body.postTitle,
+	content:req.body.postBody
+});
+//save to DB	
+post.save(function(err){
+   if (!err){
 
-  res.redirect("/");
+     res.redirect("/");
+
+   }
+
+ });
+  // const post = {
+  //   title: req.body.postTitle,
+  //   content: req.body.postBody
+  // };
+
+  // posts.push(post);
 
 });
 
-app.get("/posts/:postName", function(req, res){
-  const requestedTitle = _.lowerCase(req.params.postName);
+app.get("/posts/:postId", function(req, res){
+  const requestedPostId = req.params.postId;
 
-  posts.forEach(function(post){
-    const storedTitle = _.lowerCase(post.title);
+  // posts.forEach(function(post){
+  //   const storedTitle = _.lowerCase(post.title);
 
-    if (storedTitle === requestedTitle) {
-      res.render("post", {
-        title: post.title,
-        content: post.content
-      });
-    }
-  });
+  //   if (storedTitle === requestedTitle) {
+  //     res.render("post", {
+  //       title: post.title,
+  //       content: post.content
+  //     });
+  //   }
+  // });
+	
+   Post.findOne({_id: requestedPostId}, function(err, post){
+
+   res.render("post", {
+
+     title: post.title,
+
+     content: post.content
+
+   });
+
+ });
 
 });
 
