@@ -1,5 +1,10 @@
 //jshint esversion:6
 
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -18,8 +23,9 @@ app.use(express.static("public"));
 
 //define mongoose use and connect to local DB
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost:27017/blogDB", {useNewUrlParser: true});
+// mongoose.connect("mongodb://localhost:27017/blogDB", {useNewUrlParser: true});
 
+mongoose.connect("mongodb+srv://admin-kumargn:Gnk69%40Jay73@cluster0.vpzxn.mongodb.net/blogDB");
 //create schema for blog posts
 const postSchema = new mongoose.Schema({
 	// for the title of the post
@@ -110,6 +116,6 @@ app.get("/posts/:postId", function(req, res){
 
 });
 
-app.listen(3000, function() {
+app.listen(port, function() {
   console.log("Server started on port 3000");
 });
